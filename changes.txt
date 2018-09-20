@@ -1,0 +1,16 @@
+v. 1.0.5, Sep 20, 2018
+- moved from subversion to github
+
+v. 1.0.4, Jan 25, 2018
+- updated to properly show nr of counts: inserted, updated and up-to-date
+
+v. 1.0.3, Jun 28, 2017
+- fixed runme.sh script, when run by cron
+
+v. 1.0.2, Jun 28, 2017
+- upgraded build scripts from JDK 7 to JDK 8
+- optimized sql bottleneck to halve the pipeline running time
+
+v. 1.0.1, Jan 31, 2017
+- upgraded build scripts from ant to gradle
+- minor code refactoring
