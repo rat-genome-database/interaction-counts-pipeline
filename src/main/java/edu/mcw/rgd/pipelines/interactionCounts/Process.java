@@ -1,6 +1,8 @@
 package edu.mcw.rgd.pipelines.interactionCounts;
 
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.process.Utils;
+import org.apache.log4j.Logger;
 
 import java.util.*;
 import java.util.Map;
@@ -12,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Process {
 
     private Dao dao;
+    Logger log = Logger.getLogger("status");
 
     // build assoc map for: gene-rgd-id ==> list-of-protein-rgd-ids
     public Map<Integer, List<Integer>> getAssociationsMap(Collection<Integer> geneRgdIds) throws Exception{
@@ -46,6 +49,7 @@ public class Process {
             try {
                 count = getDao().getInteractionCountByRgdIdsList(associatedProteinRgdIds);
             } catch(Exception e) {
+                Utils.printStackTrace(e, log);
                 throw new RuntimeException(e);
             }
             geneIntCountsMap.put(geneRgdId, count);
