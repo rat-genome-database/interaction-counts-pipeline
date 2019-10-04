@@ -1,10 +1,10 @@
 package edu.mcw.rgd.pipelines.interactionCounts;
 
-import edu.mcw.rgd.dao.impl.AssociationDAO;
+//import edu.mcw.rgd.dao.impl.AssociationDAO;
 import edu.mcw.rgd.dao.impl.InteractionCountsDAO;
 import edu.mcw.rgd.dao.impl.InteractionsDAO;
 import edu.mcw.rgd.dao.impl.RGDManagementDAO;
-import edu.mcw.rgd.datamodel.Association;
+//import edu.mcw.rgd.datamodel.Association;
 import edu.mcw.rgd.datamodel.Interaction;
 import edu.mcw.rgd.datamodel.InteractionCount;
 import edu.mcw.rgd.datamodel.RgdId;
@@ -19,7 +19,7 @@ import java.util.Set;
  */
 public class Dao {
 
-    private AssociationDAO adao= new AssociationDAO();
+    //private AssociationDAO adao= new AssociationDAO();
     private InteractionsDAO idao= new InteractionsDAO();
     private InteractionCountsDAO countsDAO= new InteractionCountsDAO();
     private RGDManagementDAO rgdDAO = new RGDManagementDAO();
@@ -44,21 +44,28 @@ public class Dao {
 
         return getActiveRgdIds(RgdId.OBJECT_KEY_PROTEINS);
     }
-
+/*
     public List<Association> getAssociationsByType(String assocType) throws Exception {
         return adao.getAssociationsByType(assocType);
     }
-
+*/
     public List<Interaction> getInteractions() throws Exception {
         return idao.getInteractions();
     }
-
+/*
     public int getInteractionCountByRgdIdsList(List<Integer> rgdIds) throws Exception {
         if( rgdIds==null || rgdIds.isEmpty() ) {
             return 0;
         }
         return idao.getInteractionCountByRgdIdsList(rgdIds);
     }
+*/
+    public int getInteractionCountByGeneRgdId(int geneRgdId) throws Exception {
+
+        return idao.getInteractionCountByGeneRgdId(geneRgdId);
+    }
+
+
 
     // return: -1: inserted, 1-updated, 0-up-to-date
     public int upsertInteractionCount(InteractionCount ic) throws Exception {

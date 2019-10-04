@@ -16,38 +16,15 @@ public class Process {
     private Dao dao;
     Logger log = Logger.getLogger("status");
 
-    // build assoc map for: gene-rgd-id ==> list-of-protein-rgd-ids
-    public Map<Integer, List<Integer>> getAssociationsMap(Collection<Integer> geneRgdIds) throws Exception{
-        List<Association> assocs = getDao().getAssociationsByType("protein_to_gene");
-        Map<Integer, List<Integer>> assocMap = new HashMap<>((geneRgdIds.size()*5)/4);
-
-        // initialize map for every gene
-        for( Integer geneRgdId: geneRgdIds ) {
-            assocMap.put(geneRgdId, new ArrayList<Integer>());
-        }
-
-        for( Association a: assocs ){
-            int rgdId = a.getDetailRgdId();
-            if( geneRgdIds.contains(rgdId) ) {
-                List<Integer> proteinRgdIds = assocMap.get(rgdId);
-                proteinRgdIds.add(a.getMasterRgdId());
-            }
-        }
-        return assocMap;
-    }
-
     public Map<Integer, Integer> getInteractionCountsOfGenes(Collection<Integer> geneRgdIds) throws Exception{
 
         Map<Integer, Integer> geneIntCountsMap = new ConcurrentHashMap<>();
-        Map<Integer, List<Integer>> associationsMap = this.getAssociationsMap(geneRgdIds);
 
         // use JDK8 parallel streams to load interaction counts for genes
-        associationsMap.entrySet().parallelStream().forEach( (entry) -> {
-            int geneRgdId = entry.getKey();
-            List<Integer> associatedProteinRgdIds = entry.getValue();
+        geneRgdIds.parallelStream().forEach( geneRgdId -> {
             int count;
             try {
-                count = getDao().getInteractionCountByRgdIdsList(associatedProteinRgdIds);
+                count = getDao().getInteractionCountByGeneRgdId(geneRgdId);
             } catch(Exception e) {
                 Utils.printStackTrace(e, log);
                 throw new RuntimeException(e);
