@@ -10,4 +10,4 @@ fi
 
 $APPDIR/_run.sh "$@"
 
-mailx -s "[$SERVER] InteractionCounts Pipeline OK" $EMAIL_LIST < $APPDIR/run.log
+mailx -s "[$SERVER] InteractionCounts Pipeline OK" $EMAIL_LIST < $APPDIR/logs/summary.log
