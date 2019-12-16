@@ -42,31 +42,31 @@ public class Manager {
         p.setDao(dao);
 
         Collection<Integer> geneRgdIds = dao.getActiveGeneRgdIds();
-        log.info("Total Active Genes: " + geneRgdIds.size());
+        log.info("Total Active Genes: " + Utils.formatThousands(geneRgdIds.size()));
 
         Collection<Integer> proteinRgdIds = dao.getActiveProteinRgdIds();
-        log.info("Total Active Proteins: " + proteinRgdIds.size());
+        log.info("Total Active Proteins: " + Utils.formatThousands(proteinRgdIds.size()));
 
         // Map of Gene RgdId and its count
         Map<Integer, Integer> geneMap = p.getInteractionCountsOfGenes(geneRgdIds);
-        log.info("geneMap Size: " + geneMap.size());
+        log.debug("geneMap Size: " + Utils.formatThousands(geneMap.size()));
 
         // Map of Protein RgdId and its count
         Map<Integer, Integer> proteinMap = p.getInteractionCountsOfProteins(proteinRgdIds);
-        log.info("proteinMap Size: " + proteinMap.size());
+        log.debug("proteinMap Size: " + Utils.formatThousands(proteinMap.size()));
 
         int[] insertedGeneCount=p.insertOrUpdate(geneMap);
         log.info("   gene-protein interactions"
-                +"   up-to-date=" + insertedGeneCount[2]
-                +"   updated=" + insertedGeneCount[1]
-                +"   inserted=" + insertedGeneCount[0]);
+                +"   up-to-date=" + Utils.formatThousands(insertedGeneCount[2])
+                +"   updated=" + Utils.formatThousands(insertedGeneCount[1])
+                +"   inserted=" + Utils.formatThousands(insertedGeneCount[0]));
 
         int[] insertedProteinCount=p.insertOrUpdate(proteinMap);
         long time6 = System.currentTimeMillis();
         log.info(" protein-protein interactions"
-                +"   up-to-date=" + insertedProteinCount[2]
-                +"   updated=" + insertedProteinCount[1]
-                +"   inserted=" + insertedProteinCount[0]);
+                +"   up-to-date=" + Utils.formatThousands(insertedProteinCount[2])
+                +"   updated=" + Utils.formatThousands(insertedProteinCount[1])
+                +"   inserted=" + Utils.formatThousands(insertedProteinCount[0]));
 
         log.info("=== OK ===   "+ Utils.formatElapsedTime(time0, time6));
         log.info("");
