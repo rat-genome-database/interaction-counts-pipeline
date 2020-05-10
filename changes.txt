@@ -1,3 +1,6 @@
+May 10, 2020
+  updated jar dependencies
+
 Dec 16, 2019
 - improved summary email
 
