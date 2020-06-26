@@ -1,5 +1,6 @@
 package edu.mcw.rgd.pipelines.interactionCounts;
 
+import edu.mcw.rgd.process.CounterPool;
 import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -55,18 +56,32 @@ public class Manager {
         Map<Integer, Integer> proteinMap = p.getInteractionCountsOfProteins(proteinRgdIds);
         log.debug("proteinMap Size: " + Utils.formatThousands(proteinMap.size()));
 
-        int[] insertedGeneCount=p.insertOrUpdate(geneMap);
+        CounterPool geneCounters = p.insertOrUpdate(geneMap);
         log.info("   gene-protein interactions"
-                +"   up-to-date=" + Utils.formatThousands(insertedGeneCount[2])
-                +"   updated=" + Utils.formatThousands(insertedGeneCount[1])
-                +"   inserted=" + Utils.formatThousands(insertedGeneCount[0]));
+                +"   up-to-date=" + Utils.formatThousands(geneCounters.get("up-to-date"))
+                +"   updated=" + Utils.formatThousands(geneCounters.get("updated"))
+                +"   inserted=" + Utils.formatThousands(geneCounters.get("inserted")));
 
-        int[] insertedProteinCount=p.insertOrUpdate(proteinMap);
+        CounterPool proteinCounters = p.insertOrUpdate(proteinMap);
         long time6 = System.currentTimeMillis();
         log.info(" protein-protein interactions"
-                +"   up-to-date=" + Utils.formatThousands(insertedProteinCount[2])
-                +"   updated=" + Utils.formatThousands(insertedProteinCount[1])
-                +"   inserted=" + Utils.formatThousands(insertedProteinCount[0]));
+                +"   up-to-date=" + Utils.formatThousands(proteinCounters.get("up-to-date"))
+                +"   updated=" + Utils.formatThousands(proteinCounters.get("updated"))
+                +"   inserted=" + Utils.formatThousands(proteinCounters.get("inserted")));
+
+        log.info("**** PARALLEL VERSION ****");
+
+        geneCounters = p.insertOrUpdate2(geneMap);
+        log.info("   gene-protein interactions"
+                +"   up-to-date=" + Utils.formatThousands(geneCounters.get("up-to-date"))
+                +"   updated=" + Utils.formatThousands(geneCounters.get("updated"))
+                +"   inserted=" + Utils.formatThousands(geneCounters.get("inserted")));
+
+        proteinCounters = p.insertOrUpdate2(proteinMap);
+        log.info(" protein-protein interactions"
+                +"   up-to-date=" + Utils.formatThousands(proteinCounters.get("up-to-date"))
+                +"   updated=" + Utils.formatThousands(proteinCounters.get("updated"))
+                +"   inserted=" + Utils.formatThousands(proteinCounters.get("inserted")));
 
         log.info("=== OK ===   "+ Utils.formatElapsedTime(time0, time6));
         log.info("");

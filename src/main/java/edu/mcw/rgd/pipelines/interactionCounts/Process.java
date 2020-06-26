@@ -1,6 +1,7 @@
 package edu.mcw.rgd.pipelines.interactionCounts;
 
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.process.CounterPool;
 import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
 
@@ -54,23 +55,51 @@ public class Process {
         return proteinIntCountMap;
     }
 
-    // return: [0]-inserted, [1]-updated, [2]-up-to-date
-    public int[] insertOrUpdate(Map<Integer, Integer> map) throws Exception{
-        int[] insertOrUpdateCount=new int[3];
+    /// @return: counts for 'inserted', 'updated', 'up-to-date'
+    public CounterPool insertOrUpdate(Map<Integer, Integer> map) throws Exception{
+        long time0 = System.currentTimeMillis();
+        CounterPool counters = new CounterPool();
         for(Map.Entry<Integer,Integer> entry: map.entrySet()){
             InteractionCount i= new InteractionCount();
             i.setRgdId(entry.getKey());
             i.setCount(entry.getValue());
             int affectedRows = getDao().upsertInteractionCount(i);
             if( affectedRows<0 ) {
-                insertOrUpdateCount[0]++; // insert
+                counters.increment("inserted");
             } else if( affectedRows>0 ) {
-                insertOrUpdateCount[1]++; // update
+                counters.increment("updated");
             } else {
-                insertOrUpdateCount[2]++; // up-to-date
+                counters.increment("up-to-date");
             }
         }
-        return insertOrUpdateCount;
+        log.info("=== duration     "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
+        return counters;
+    }
+
+    /// @return: counts for 'inserted', 'updated', 'up-to-date'
+    public CounterPool insertOrUpdate2(Map<Integer, Integer> map) {
+        long time0 = System.currentTimeMillis();
+        CounterPool counters = new CounterPool();
+        map.entrySet().forEach( entry -> {
+            InteractionCount i= new InteractionCount();
+            i.setRgdId(entry.getKey());
+            i.setCount(entry.getValue());
+            int affectedRows;
+            try {
+                affectedRows = getDao().upsertInteractionCount(i);
+            } catch( Exception e ) {
+                throw new RuntimeException(e);
+            }
+            if( affectedRows<0 ) {
+                counters.increment("inserted");
+            } else if( affectedRows>0 ) {
+                counters.increment("updated");
+            } else {
+                counters.increment("up-to-date");
+            }
+        });
+        log.info("=== duration     "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
+        return counters;
     }
 
     public Dao getDao() {
