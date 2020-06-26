@@ -51,18 +51,25 @@ public class Dao {
     }
 
     public int getInteractionCountByGeneRgdId(int geneRgdId) throws Exception {
-
         return idao.getInteractionCountByGeneRgdId(geneRgdId);
     }
-
-
 
     // return: -1: inserted, 1-updated, 0-up-to-date
     public int upsertInteractionCount(InteractionCount ic) throws Exception {
         InteractionCount inRgd = countsDAO.getInteractionCount(ic.getRgdId());
         if( inRgd==null ) {
+            // insert only non-zero entries
             return -countsDAO.insert(ic);
         }
         return countsDAO.update(ic);
+    }
+
+    /**
+     * delete interaction counts with value of 0 ('zero')
+     * @return count of deleted interactions
+     */
+    public int deleteEntriesWithNoInteractions() throws Exception {
+        String sql = "DELETE FROM interaction_counts WHERE interactions_count=0";
+        return idao.update(sql);
     }
 }

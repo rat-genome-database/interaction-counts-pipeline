@@ -60,30 +60,23 @@ public class Manager {
         log.info("   gene-protein interactions"
                 +"   up-to-date=" + Utils.formatThousands(geneCounters.get("up-to-date"))
                 +"   updated=" + Utils.formatThousands(geneCounters.get("updated"))
-                +"   inserted=" + Utils.formatThousands(geneCounters.get("inserted")));
+                +"   inserted=" + Utils.formatThousands(geneCounters.get("inserted"))
+                +"   with zero=" + Utils.formatThousands(geneCounters.get("zero")));
 
         CounterPool proteinCounters = p.insertOrUpdate(proteinMap);
         long time6 = System.currentTimeMillis();
         log.info(" protein-protein interactions"
                 +"   up-to-date=" + Utils.formatThousands(proteinCounters.get("up-to-date"))
                 +"   updated=" + Utils.formatThousands(proteinCounters.get("updated"))
-                +"   inserted=" + Utils.formatThousands(proteinCounters.get("inserted")));
+                +"   inserted=" + Utils.formatThousands(proteinCounters.get("inserted"))
+                +"   with zero=" + Utils.formatThousands(proteinCounters.get("zero")));
 
-        log.info("**** PARALLEL VERSION ****");
+        log.info("=== LOAD OK ===   "+ Utils.formatElapsedTime(time0, time6));
 
-        geneCounters = p.insertOrUpdate2(geneMap);
-        log.info("   gene-protein interactions"
-                +"   up-to-date=" + Utils.formatThousands(geneCounters.get("up-to-date"))
-                +"   updated=" + Utils.formatThousands(geneCounters.get("updated"))
-                +"   inserted=" + Utils.formatThousands(geneCounters.get("inserted")));
+        int deleteEntriesWithNoInteractions = dao.deleteEntriesWithNoInteractions();
+        log.info(" deleted entries with no interactions: "+ deleteEntriesWithNoInteractions);
 
-        proteinCounters = p.insertOrUpdate2(proteinMap);
-        log.info(" protein-protein interactions"
-                +"   up-to-date=" + Utils.formatThousands(proteinCounters.get("up-to-date"))
-                +"   updated=" + Utils.formatThousands(proteinCounters.get("updated"))
-                +"   inserted=" + Utils.formatThousands(proteinCounters.get("inserted")));
-
-        log.info("=== OK ===   "+ Utils.formatElapsedTime(time0, time6));
+        log.info("=== OK ===   "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
         log.info("");
     }
 

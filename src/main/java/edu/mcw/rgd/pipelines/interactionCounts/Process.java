@@ -56,34 +56,19 @@ public class Process {
     }
 
     /// @return: counts for 'inserted', 'updated', 'up-to-date'
-    public CounterPool insertOrUpdate(Map<Integer, Integer> map) throws Exception{
-        long time0 = System.currentTimeMillis();
-        CounterPool counters = new CounterPool();
-        for(Map.Entry<Integer,Integer> entry: map.entrySet()){
-            InteractionCount i= new InteractionCount();
-            i.setRgdId(entry.getKey());
-            i.setCount(entry.getValue());
-            int affectedRows = getDao().upsertInteractionCount(i);
-            if( affectedRows<0 ) {
-                counters.increment("inserted");
-            } else if( affectedRows>0 ) {
-                counters.increment("updated");
-            } else {
-                counters.increment("up-to-date");
-            }
-        }
-        log.info("=== duration     "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
-        return counters;
-    }
-
-    /// @return: counts for 'inserted', 'updated', 'up-to-date'
-    public CounterPool insertOrUpdate2(Map<Integer, Integer> map) {
-        long time0 = System.currentTimeMillis();
+    public CounterPool insertOrUpdate(Map<Integer, Integer> map) {
         CounterPool counters = new CounterPool();
         map.entrySet().forEach( entry -> {
             InteractionCount i= new InteractionCount();
             i.setRgdId(entry.getKey());
             i.setCount(entry.getValue());
+
+            // do not process entries with zero interactions count
+            if( i.getCount()==0 ) {
+                counters.increment("zero");
+                return;
+            }
+
             int affectedRows;
             try {
                 affectedRows = getDao().upsertInteractionCount(i);
@@ -98,7 +83,6 @@ public class Process {
                 counters.increment("up-to-date");
             }
         });
-        log.info("=== duration     "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
         return counters;
     }
 
