@@ -3,7 +3,8 @@ package edu.mcw.rgd.pipelines.interactionCounts;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.process.CounterPool;
 import edu.mcw.rgd.process.Utils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Process {
 
     private Dao dao;
-    Logger log = Logger.getLogger("status");
+    Logger log = LogManager.getLogger("status");
 
     public Map<Integer, Integer> getInteractionCountsOfGenes(Collection<Integer> geneRgdIds) throws Exception{
 

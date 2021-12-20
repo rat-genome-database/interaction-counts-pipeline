@@ -1,3 +1,6 @@
+Dec 20, 2021
+  updated log4j to avoid zero day exploit
+
 Jun 26, 2020
   entries with zero interactions count are no longer stored in the table
 
