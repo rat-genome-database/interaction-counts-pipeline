@@ -1,7 +1,7 @@
 # runs the pipeline
 
 . /etc/profile
-APPDIR=/home/rgddata/pipelines/InteractionCounts
+APPDIR=/home/rgddata/pipelines/interaction-counts-pipeline
 SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
 EMAIL_LIST=mtutaj@mcw.edu
 if [ "$SERVER" = "REED" ]; then

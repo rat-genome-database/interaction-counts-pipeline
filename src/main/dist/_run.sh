@@ -3,7 +3,7 @@
 # Goal: rebuild interaction counts
 #
 . /etc/profile
-APPNAME=InteractionCounts
+APPNAME="interaction-counts-pipeline"
 
 APPDIR=/home/rgddata/pipelines/$APPNAME
 cd $APPDIR
