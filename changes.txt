@@ -1,3 +1,6 @@
+Apr 26, 2022
+  improved logging
+
 Jan 05, 2022
   renamed to 'interaction-counts-pipeline' from 'InteractionCounts'
 
