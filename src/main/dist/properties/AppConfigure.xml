@@ -2,7 +2,7 @@
 
 <beans>
     <bean id="manager" class="edu.mcw.rgd.pipelines.interactionCounts.Manager" >
-        <property name="version" value="Interaction Counts  -- build Dec 12, 2023" />
+        <property name="version" value="Interaction Counts  -- build Apr 19, 2024" />
     </bean>
 
 </beans>
