@@ -1,6 +1,7 @@
 package edu.mcw.rgd.pipelines.interactionCounts;
 
 import edu.mcw.rgd.process.CounterPool;
+import edu.mcw.rgd.process.MemoryMonitor;
 import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,6 +34,10 @@ public class Manager {
 	
     public void run() throws Exception{
         long time0 = System.currentTimeMillis();
+
+        MemoryMonitor memoryMonitor = new MemoryMonitor();
+        memoryMonitor.start();
+
         log.info(getVersion());
 
         log.info("    "+dao.getConnectionInfo());
@@ -77,6 +82,8 @@ public class Manager {
         int deleteEntriesWithNoInteractions = dao.deleteEntriesWithNoInteractions();
         log.info(" deleted entries with no interactions: "+ deleteEntriesWithNoInteractions);
 
+        memoryMonitor.stop();
+        log.info(memoryMonitor.getSummary());
         log.info("=== OK ===   "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
         log.info("");
     }
