@@ -38,21 +38,20 @@ public class Process {
     }
 
     public Map<Integer, Integer> getInteractionCountsOfProteins(Collection<Integer> proteinRgdIds) throws Exception{
-        Map<Integer, Integer> proteinIntCountMap = new ConcurrentHashMap<>();
-        List<Interaction> interactionList = getDao().getInteractions();
-        List<Integer> listOfProteinRgdIds = new ArrayList<>(proteinRgdIds);
-
-        listOfProteinRgdIds.parallelStream().forEach( (rgdId) -> {
-            List<Interaction> interactions= new ArrayList<>();
-            for(Interaction i: interactionList){
-                if(i.getRgdId1()==rgdId || i.getRgdId2()==rgdId){
-                    interactions.add(i);
-                }
+        // single pass over the interaction list (O(I)) instead of O(P * I): for each interaction,
+        // bump the counter for either endpoint that is in the protein set; self-interactions count once
+        Set<Integer> proteinSet = (proteinRgdIds instanceof Set) ? (Set<Integer>) proteinRgdIds : new HashSet<>(proteinRgdIds);
+        Map<Integer, Integer> proteinIntCountMap = new HashMap<>();
+        for (Interaction i : getDao().getInteractions()) {
+            int r1 = i.getRgdId1();
+            int r2 = i.getRgdId2();
+            if (proteinSet.contains(r1)) {
+                proteinIntCountMap.merge(r1, 1, Integer::sum);
             }
-            int count= interactions.size();
-            proteinIntCountMap.put(rgdId, count);
-        });
-
+            if (r2 != r1 && proteinSet.contains(r2)) {
+                proteinIntCountMap.merge(r2, 1, Integer::sum);
+            }
+        }
         return proteinIntCountMap;
     }
 
