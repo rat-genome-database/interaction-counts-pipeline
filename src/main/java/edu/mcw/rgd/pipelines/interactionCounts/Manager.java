@@ -49,7 +49,7 @@ public class Manager {
         p.setDao(dao);
 
         Collection<Integer> geneRgdIds = dao.getActiveGeneRgdIds();
-        log.info("Total Active Genes: " + Utils.formatThousands(geneRgdIds.size()));
+        log.info("Total Active Genes   : " + Utils.formatThousands(geneRgdIds.size()));
 
         Collection<Integer> proteinRgdIds = dao.getActiveProteinRgdIds();
         log.info("Total Active Proteins: " + Utils.formatThousands(proteinRgdIds.size()));
@@ -70,17 +70,20 @@ public class Manager {
                 +"   with zero=" + Utils.formatThousands(geneCounters.get("zero")));
 
         CounterPool proteinCounters = p.insertOrUpdate(proteinMap);
-        long time6 = System.currentTimeMillis();
         log.info(" protein-protein interactions"
-                +"   up-to-date=" + Utils.formatThousands(proteinCounters.get("up-to-date"))
+                +"  up-to-date=" + Utils.formatThousands(proteinCounters.get("up-to-date"))
                 +"   updated=" + Utils.formatThousands(proteinCounters.get("updated"))
                 +"   inserted=" + Utils.formatThousands(proteinCounters.get("inserted"))
                 +"   with zero=" + Utils.formatThousands(proteinCounters.get("zero")));
 
-        log.info("=== LOAD OK ===   "+ Utils.formatElapsedTime(time0, time6));
+        // keep only rgd_ids that still have a non-zero interaction count; any other row in the
+        // table has either dropped to zero or is no longer active, and must be removed
+        Set<Integer> keptRgdIds = new HashSet<>();
+        geneMap.forEach((rgdId, count) -> { if( count>0 ) keptRgdIds.add(rgdId); });
+        proteinMap.forEach((rgdId, count) -> { if( count>0 ) keptRgdIds.add(rgdId); });
 
-        int deleteEntriesWithNoInteractions = dao.deleteEntriesWithNoInteractions();
-        log.info(" deleted entries with no interactions: "+ deleteEntriesWithNoInteractions);
+        int deletedCount = dao.deleteStaleCounts(keptRgdIds);
+        log.info(" deleted entries with no interactions: "+ deletedCount);
 
         memoryMonitor.stop();
         log.info(memoryMonitor.getSummary());

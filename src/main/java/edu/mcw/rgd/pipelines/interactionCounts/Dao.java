@@ -3,10 +3,13 @@ package edu.mcw.rgd.pipelines.interactionCounts;
 import edu.mcw.rgd.dao.impl.InteractionCountsDAO;
 import edu.mcw.rgd.dao.impl.InteractionsDAO;
 import edu.mcw.rgd.dao.impl.RGDManagementDAO;
+import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.datamodel.Interaction;
 import edu.mcw.rgd.datamodel.InteractionCount;
 import edu.mcw.rgd.datamodel.RgdId;
+import edu.mcw.rgd.process.Utils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -65,11 +68,23 @@ public class Dao {
     }
 
     /**
-     * delete interaction counts with value of 0 ('zero')
-     * @return count of deleted interactions
+     * delete interaction_counts rows whose rgd_id is no longer in the set of non-zero counts
+     * produced by this run -- i.e. counts that dropped to zero, or objects no longer active
+     * @param keptRgdIds rgd_ids that still have a non-zero interaction count and must be kept
+     * @return count of deleted rows
      */
-    public int deleteEntriesWithNoInteractions() throws Exception {
-        String sql = "DELETE FROM interaction_counts WHERE interactions_count=0";
-        return idao.update(sql);
+    public int deleteStaleCounts(Set<Integer> keptRgdIds) throws Exception {
+        List<Integer> staleIds = new ArrayList<>();
+        for( int rgdId: IntListQuery.execute(countsDAO, "SELECT rgd_id FROM interaction_counts") ) {
+            if( !keptRgdIds.contains(rgdId) ) {
+                staleIds.add(rgdId);
+            }
+        }
+        // Oracle limits an IN list to 1000 items, so delete in chunks
+        for( int i=0; i<staleIds.size(); i+=1000 ) {
+            List<Integer> chunk = staleIds.subList(i, Math.min(i+1000, staleIds.size()));
+            countsDAO.update("DELETE FROM interaction_counts WHERE rgd_id IN (" + Utils.concatenate(chunk, ",") + ")");
+        }
+        return staleIds.size();
     }
 }

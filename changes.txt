@@ -1,3 +1,6 @@
+Jun 10, 2026
+  fixed cleanup of counts that dropped to zero; tidied summary log; updated dependencies
+
 May 27, 2026
   protein interaction counts: single-pass O(I) walk (was O(P*I)); dropped unused commons-net; updated dependencies
 
