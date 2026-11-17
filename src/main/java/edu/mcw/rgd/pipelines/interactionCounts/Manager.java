@@ -1,5 +1,6 @@
 package edu.mcw.rgd.pipelines.interactionCounts;
 
+import edu.mcw.rgd.datamodel.Interaction;
 import edu.mcw.rgd.process.CounterPool;
 import edu.mcw.rgd.process.MemoryMonitor;
 import edu.mcw.rgd.process.Utils;
@@ -54,12 +55,15 @@ public class Manager {
         Collection<Integer> proteinRgdIds = dao.getActiveProteinRgdIds();
         log.info("Total Active Proteins: " + Utils.formatThousands(proteinRgdIds.size()));
 
+        List<Interaction> interactions = dao.getInteractions();
+        log.info("Total Interactions   : " + Utils.formatThousands(interactions.size()));
+
         // Map of Gene RgdId and its count
-        Map<Integer, Integer> geneMap = p.getInteractionCountsOfGenes(geneRgdIds);
+        Map<Integer, Integer> geneMap = p.getInteractionCountsOfGenes(geneRgdIds, interactions);
         log.debug("geneMap Size: " + Utils.formatThousands(geneMap.size()));
 
         // Map of Protein RgdId and its count
-        Map<Integer, Integer> proteinMap = p.getInteractionCountsOfProteins(proteinRgdIds);
+        Map<Integer, Integer> proteinMap = p.getInteractionCountsOfProteins(proteinRgdIds, interactions);
         log.debug("proteinMap Size: " + Utils.formatThousands(proteinMap.size()));
 
         CounterPool geneCounters = p.insertOrUpdate(geneMap);

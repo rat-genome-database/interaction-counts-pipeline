@@ -1,9 +1,11 @@
 package edu.mcw.rgd.pipelines.interactionCounts;
 
+import edu.mcw.rgd.dao.impl.AssociationDAO;
 import edu.mcw.rgd.dao.impl.InteractionCountsDAO;
 import edu.mcw.rgd.dao.impl.InteractionsDAO;
 import edu.mcw.rgd.dao.impl.RGDManagementDAO;
 import edu.mcw.rgd.dao.spring.IntListQuery;
+import edu.mcw.rgd.datamodel.Association;
 import edu.mcw.rgd.datamodel.Interaction;
 import edu.mcw.rgd.datamodel.InteractionCount;
 import edu.mcw.rgd.datamodel.RgdId;
@@ -23,6 +25,7 @@ public class Dao {
     private InteractionsDAO idao= new InteractionsDAO();
     private InteractionCountsDAO countsDAO= new InteractionCountsDAO();
     private RGDManagementDAO rgdDAO = new RGDManagementDAO();
+    private AssociationDAO assocDAO = new AssociationDAO();
 
     public String getConnectionInfo() {
         return idao.getConnectionInfo();
@@ -53,8 +56,8 @@ public class Dao {
         return idao.getInteractions();
     }
 
-    public int getInteractionCountByGeneRgdId(int geneRgdId) throws Exception {
-        return idao.getInteractionCountByGeneRgdId(geneRgdId);
+    public List<Association> getProteinToGeneAssociations() throws Exception {
+        return assocDAO.getAssociationsByType("protein_to_gene");
     }
 
     // return: -1: inserted, 1-updated, 0-up-to-date
