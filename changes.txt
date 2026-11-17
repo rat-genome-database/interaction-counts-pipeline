@@ -1,3 +1,6 @@
+Nov 17, 2026
+  gene counts computed in one pass over interactions (was one query per gene); FAILED email on errors; updated dependencies
+
 Jul 24, 2026
   updated dependencies
 

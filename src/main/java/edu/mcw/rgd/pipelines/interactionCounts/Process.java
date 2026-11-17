@@ -2,13 +2,9 @@ package edu.mcw.rgd.pipelines.interactionCounts;
 
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.process.CounterPool;
-import edu.mcw.rgd.process.Utils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map; // java.util.Map, not edu.mcw.rgd.datamodel.Map
 
 /**
  * Created by jthota on 6/9/2016.
@@ -16,33 +12,41 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Process {
 
     private Dao dao;
-    Logger log = LogManager.getLogger("status");
 
-    public Map<Integer, Integer> getInteractionCountsOfGenes(Collection<Integer> geneRgdIds) throws Exception{
+    public Map<Integer, Integer> getInteractionCountsOfGenes(Collection<Integer> geneRgdIds, List<Interaction> interactions) throws Exception{
 
-        Map<Integer, Integer> geneIntCountsMap = new ConcurrentHashMap<>();
+        // protein rgd id -> rgd ids of genes encoding that protein
+        Map<Integer, List<Integer>> proteinToGenes = new HashMap<>();
+        for (Association a : getDao().getProteinToGeneAssociations()) {
+            proteinToGenes.computeIfAbsent(a.getMasterRgdId(), k -> new ArrayList<>()).add(a.getDetailRgdId());
+        }
 
-        // use JDK8 parallel streams to load interaction counts for genes
-        geneRgdIds.parallelStream().forEach( geneRgdId -> {
-            int count;
-            try {
-                count = getDao().getInteractionCountByGeneRgdId(geneRgdId);
-            } catch(Exception e) {
-                Utils.printStackTrace(e, log);
-                throw new RuntimeException(e);
+        // every active gene gets an entry, so genes without interactions are counted as zero
+        Map<Integer, Integer> geneIntCountsMap = new HashMap<>();
+        for (int geneRgdId : geneRgdIds) {
+            geneIntCountsMap.put(geneRgdId, 0);
+        }
+
+        // single pass over the interaction list: an interaction counts once for every gene
+        // encoding either of its proteins, even if both proteins belong to the same gene
+        Set<Integer> genes = new HashSet<>();
+        for (Interaction i : interactions) {
+            genes.clear();
+            genes.addAll(proteinToGenes.getOrDefault(i.getRgdId1(), List.of()));
+            genes.addAll(proteinToGenes.getOrDefault(i.getRgdId2(), List.of()));
+            for (int geneRgdId : genes) {
+                geneIntCountsMap.computeIfPresent(geneRgdId, (k, count) -> count + 1);
             }
-            geneIntCountsMap.put(geneRgdId, count);
-        });
-
+        }
         return geneIntCountsMap;
     }
 
-    public Map<Integer, Integer> getInteractionCountsOfProteins(Collection<Integer> proteinRgdIds) throws Exception{
+    public Map<Integer, Integer> getInteractionCountsOfProteins(Collection<Integer> proteinRgdIds, List<Interaction> interactions) throws Exception{
         // single pass over the interaction list (O(I)) instead of O(P * I): for each interaction,
         // bump the counter for either endpoint that is in the protein set; self-interactions count once
         Set<Integer> proteinSet = (proteinRgdIds instanceof Set) ? (Set<Integer>) proteinRgdIds : new HashSet<>(proteinRgdIds);
         Map<Integer, Integer> proteinIntCountMap = new HashMap<>();
-        for (Interaction i : getDao().getInteractions()) {
+        for (Interaction i : interactions) {
             int r1 = i.getRgdId1();
             int r2 = i.getRgdId2();
             if (proteinSet.contains(r1)) {

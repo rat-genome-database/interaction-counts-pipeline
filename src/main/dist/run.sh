@@ -8,6 +8,8 @@ if [ "$SERVER" = "REED" ]; then
   EMAIL_LIST="mtutaj@mcw.edu jthota@mcw.edu"
 fi
 
-$APPDIR/_run.sh "$@"
-
-mailx -s "[$SERVER] InteractionCounts Pipeline OK" $EMAIL_LIST < $APPDIR/logs/summary.log
+if $APPDIR/_run.sh "$@"; then
+  mailx -s "[$SERVER] InteractionCounts Pipeline OK" $EMAIL_LIST < $APPDIR/logs/summary.log
+else
+  mailx -s "[$SERVER] InteractionCounts Pipeline FAILED" $EMAIL_LIST < $APPDIR/run.log
+fi
